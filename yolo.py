@@ -20,18 +20,19 @@ import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 from keras.utils import multi_gpu_model
 gpu_num=1
-
+basedir='/home/cj3272/VSCODE_WORKSPACE/luccauchon.keras-yolo-v3/keras-yolo3/'
+imgsize=608
 class YOLO(object):
     def __init__(self):
-        self.model_path = 'model_data/yolo.h5' # model path or trained weights path
-        self.anchors_path = 'model_data/yolo_anchors.txt'
-        self.classes_path = 'model_data/coco_classes.txt'
+        self.model_path = basedir+'model_data/yolo.h5' # model path or trained weights path
+        self.anchors_path = basedir+'model_data/yolo_anchors.txt'
+        self.classes_path = basedir+'model_data/coco_classes.txt'
         self.score = 0.3
         self.iou = 0.45
         self.class_names = self._get_class()
         self.anchors = self._get_anchors()
         self.sess = K.get_session()
-        self.model_image_size = (416, 416) # fixed size or (None, None), hw
+        self.model_image_size = (imgsize, imgsize) # fixed size or (None, None), hw
         self.boxes, self.scores, self.classes = self.generate()
 
     def _get_class(self):
@@ -116,7 +117,7 @@ class YOLO(object):
 
         print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
 
-        font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
+        font = ImageFont.truetype(font=basedir+'font/FiraMono-Medium.otf',
                     size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 300
 
@@ -153,7 +154,7 @@ class YOLO(object):
             del draw
 
         end = timer()
-        print(end - start)
+        print(str(end - start)+' seconds.')
         return image
 
     def close_session(self):
