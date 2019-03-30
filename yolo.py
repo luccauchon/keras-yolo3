@@ -1,7 +1,6 @@
-#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Run a YOLO_v3 style detection model on test images.
+Class definition of YOLO_v3 style detection model on image and video
 """
 
 import colorsys
@@ -17,7 +16,6 @@ from PIL import Image, ImageFont, ImageDraw
 from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
 from yolo3.utils import letterbox_image
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 from keras.utils import multi_gpu_model
 gpu_num=1
 basedir='/home/cj3272/VSCODE_WORKSPACE/luccauchon.keras-yolo-v3/keras-yolo3/'
@@ -83,8 +81,8 @@ class YOLO(object):
 
         # Generate output tensor targets for filtered bounding boxes.
         self.input_image_shape = K.placeholder(shape=(2, ))
-        if gpu_num>=2:
-            self.yolo_model = multi_gpu_model(self.yolo_model, gpus=gpu_num)
+        if self.gpu_num>=2:
+            self.yolo_model = multi_gpu_model(self.yolo_model, gpus=self.gpu_num)
         boxes, scores, classes = yolo_eval(self.yolo_model.output, self.anchors,
                 len(self.class_names), self.input_image_shape,
                 score_threshold=self.score, iou_threshold=self.iou)
@@ -160,7 +158,6 @@ class YOLO(object):
     def close_session(self):
         self.sess.close()
 
-
 def detect_video(yolo, video_path, output_path=""):
     import cv2
     vid = cv2.VideoCapture(video_path)
@@ -202,21 +199,3 @@ def detect_video(yolo, video_path, output_path=""):
             break
     yolo.close_session()
 
-
-def detect_img(yolo):
-    while True:
-        img = input('Input image filename:')
-        try:
-            image = Image.open(img)
-        except:
-            print('Open Error! Try again!')
-            continue
-        else:
-            r_image = yolo.detect_image(image)
-            r_image.show()
-    yolo.close_session()
-
-
-
-if __name__ == '__main__':
-    detect_img(YOLO())
